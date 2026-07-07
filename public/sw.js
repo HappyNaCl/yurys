@@ -36,3 +36,39 @@ self.addEventListener("fetch", (event) => {
       ),
   );
 });
+
+// --- Reminder push notifications ---
+// Receiving half only: shows whatever a push server sends. Actually delivering
+// reminders still needs (1) a client subscription via PushManager with a VAPID
+// key and (2) a backend that sends the push at each reminder's `remindAt`.
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { title: "Reminder", body: event.data ? event.data.text() : "" };
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || "Reminder", {
+      body: data.body || "",
+      icon: "/web-app-manifest-192x192.png",
+      badge: "/web-app-manifest-192x192.png",
+      data: { url: data.url || "/reminders" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/reminders";
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clients) => {
+        for (const client of clients) {
+          if ("focus" in client) return client.focus();
+        }
+        return self.clients.openWindow(url);
+      }),
+  );
+});

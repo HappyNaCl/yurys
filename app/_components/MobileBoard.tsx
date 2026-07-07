@@ -81,7 +81,7 @@ export default function MobileBoard({
                 {loading && <CardSkeletons className="h-28" />}
 
                 {!loading && col.cards.length === 0 && (
-                  <EmptyColumn title={col.title} />
+                  <EmptyColumn stage={col.id} title={col.title} />
                 )}
 
                 {col.cards.map((card) => (

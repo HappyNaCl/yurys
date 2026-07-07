@@ -24,9 +24,14 @@ const NAV = [
 function Logo() {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex h-[38px] w-[38px] items-center justify-center rounded-xl bg-[linear-gradient(150deg,#dc2b54,#7c5cbf)] shadow-[0_6px_16px_-6px_rgba(220,43,84,0.55)]">
-        <div className="h-[15px] w-[15px] rotate-45 rounded-[5px] bg-white" />
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element -- tiny static asset, skip the optimizer */}
+      <img
+        src="/favicon.svg"
+        alt=""
+        width={38}
+        height={38}
+        className="rounded-xl shadow-[0_6px_16px_-6px_rgba(220,43,84,0.55)]"
+      />
       <div className="flex flex-col leading-[1.1]">
         <span className="font-display text-[19px] font-bold text-ink">
           YuRyS

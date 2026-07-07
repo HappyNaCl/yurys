@@ -152,7 +152,7 @@ export default function KanbanBoard() {
               {cards === null && <CardSkeletons className="h-24" />}
 
               {cards !== null && col.cards.length === 0 && (
-                <EmptyColumn title={col.title} size="sm" />
+                <EmptyColumn stage={col.id} title={col.title} size="sm" />
               )}
 
               {col.cards.map((card) => (

@@ -68,9 +68,14 @@ export default function SignInScreen() {
           <div className="pointer-events-none absolute -left-6 bottom-[140px] h-20 w-20 animate-[float-dot_5.5s_ease-in-out_infinite] rounded-full bg-plum/35" />
 
           <div className="pointer-events-none relative z-[2] flex items-center gap-[11px] p-6 md:p-10">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[13px] bg-white/92">
-              <div className="h-[15px] w-[15px] rotate-45 rounded-[5px] bg-primary" />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element -- tiny static asset, skip the optimizer */}
+            <img
+              src="/favicon.svg"
+              alt=""
+              width={40}
+              height={40}
+              className="rounded-[13px]"
+            />
             <span className="font-display text-[21px] font-bold text-white">
               YuRyS
             </span>

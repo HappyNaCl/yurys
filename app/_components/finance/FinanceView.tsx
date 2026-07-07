@@ -35,8 +35,7 @@ function StatCard({
     <div className="flex items-center gap-3 rounded-[18px] border-[1.5px] border-line-soft bg-panel p-4">
       <span
         className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white"
-        style={{ background: color }}
-      >
+        style={{ background: color }}>
         <Icon name={icon} size={20} />
       </span>
       <div className="min-w-0 leading-tight">
@@ -76,7 +75,10 @@ export default function FinanceView() {
         incomeTotal += tx.amount;
       } else {
         expenseTotal += tx.amount;
-        byCategory.set(tx.category, (byCategory.get(tx.category) ?? 0) + tx.amount);
+        byCategory.set(
+          tx.category,
+          (byCategory.get(tx.category) ?? 0) + tx.amount,
+        );
       }
     }
     const segments = [...byCategory.entries()]
@@ -106,8 +108,7 @@ export default function FinanceView() {
 
         <button
           onClick={() => setDialogOpen(true)}
-          className="flex items-center gap-[7px] rounded-xl bg-primary px-[18px] py-[11px] font-display text-[14.5px] font-semibold text-white shadow-[0_6px_16px_-6px_rgba(220,43,84,0.6)] transition-colors hover:bg-primary-deep"
-        >
+          className="flex items-center gap-[7px] rounded-xl bg-primary px-[18px] py-[11px] font-display text-[14.5px] font-semibold text-white shadow-[0_6px_16px_-6px_rgba(220,43,84,0.6)] transition-colors hover:bg-primary-deep">
           <Icon name="add" size={18} />
           Add transaction
         </button>
@@ -116,7 +117,7 @@ export default function FinanceView() {
       <div className="grid items-start gap-5 px-4 pb-[calc(env(safe-area-inset-bottom)+34px)] pt-[18px] sm:px-7 lg:grid-cols-2">
         {/* Left: stats + category chart */}
         <section className="flex flex-col gap-5">
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-rows-2 gap-5">
             <StatCard
               label="Income"
               icon="arrow_upward"
@@ -140,7 +141,13 @@ export default function FinanceView() {
             ) : segments.length === 0 ? (
               <div className="flex flex-col items-center gap-2.5 py-6">
                 {/* eslint-disable-next-line @next/next/no-img-element -- tiny static asset, skip the optimizer */}
-                <img src="/todo-not-found.webp" alt="" width={80} height={80} />
+                <img
+                  src="/spending-not-found.png"
+                  alt=""
+                  width={80}
+                  height={80}
+                  className="rounded-[18px]"
+                />
                 <p className="m-0 text-center text-[13.5px] font-semibold text-muted">
                   No spending yet this month.
                 </p>
@@ -156,8 +163,7 @@ export default function FinanceView() {
                   {segments.map((s) => (
                     <li
                       key={s.label}
-                      className="flex items-center gap-2.5 text-[13px] font-bold"
-                    >
+                      className="flex items-center gap-2.5 text-[13px] font-bold">
                       <span
                         className="h-2.5 w-2.5 shrink-0 rounded-full"
                         style={{ background: s.color }}
@@ -188,7 +194,13 @@ export default function FinanceView() {
             {txs !== null && txs.length === 0 && (
               <div className="flex flex-col items-center gap-2.5 py-6">
                 {/* eslint-disable-next-line @next/next/no-img-element -- tiny static asset, skip the optimizer */}
-                <img src="/todo-not-found.webp" alt="" width={80} height={80} />
+                <img
+                  src="/income-not-found.png"
+                  alt=""
+                  width={80}
+                  height={80}
+                  className="rounded-[18px]"
+                />
                 <p className="m-0 text-center text-[13.5px] font-semibold text-muted">
                   No transactions yet this month.
                 </p>
@@ -198,8 +210,7 @@ export default function FinanceView() {
             {txs?.map((tx) => (
               <div
                 key={tx.id}
-                className="flex items-center gap-3 rounded-[14px] border-[1.5px] border-line-soft bg-card p-3"
-              >
+                className="flex items-center gap-3 rounded-[14px] border-[1.5px] border-line-soft bg-card p-3">
                 <span
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{
@@ -220,16 +231,14 @@ export default function FinanceView() {
                 <span
                   className={`shrink-0 text-[14px] font-extrabold ${
                     tx.type === "income" ? "text-[#38a186]" : "text-ink"
-                  }`}
-                >
+                  }`}>
                   {tx.type === "income" ? "+" : "−"}
                   {formatMoney(tx.amount)}
                 </span>
                 <button
                   onClick={() => deleteTransaction(user.uid, tx.id)}
                   aria-label={`Delete "${tx.note || tx.category}"`}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-soft transition-colors hover:bg-primary/6 hover:text-primary"
-                >
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-soft transition-colors hover:bg-primary/6 hover:text-primary">
                   <Icon name="close" size={15} />
                 </button>
               </div>
