@@ -1,5 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
-import { formatCardSchedule, TAGS, type Card } from "@/lib/cards";
+import { formatCardSchedule, type Card } from "@/lib/cards";
+import { FALLBACK_TAG_COLOR, tagBg } from "@/lib/tags";
 import Icon from "../Icon";
 
 // Shared card shell for both boards. Slots:
@@ -11,6 +12,7 @@ import Icon from "../Icon";
 // Remaining props (draggable, drag handlers, className) spread onto <article>.
 export default function TaskCard({
   card,
+  tagColors,
   corner,
   dateRowExtra,
   footer,
@@ -18,6 +20,7 @@ export default function TaskCard({
   ...articleProps
 }: {
   card: Card;
+  tagColors: Record<string, string>;
   corner?: ReactNode;
   dateRowExtra?: ReactNode;
   footer?: ReactNode;
@@ -29,20 +32,22 @@ export default function TaskCard({
       {...articleProps}
     >
       {corner}
-      <div className={`mb-[9px] flex flex-wrap gap-1.5 ${padRight}`}>
-        {card.tags.map((tag) => {
-          const [tagBg, tagFg] = TAGS[tag] ?? TAGS.Task;
-          return (
-            <span
-              key={tag}
-              className="rounded-lg px-2.5 py-[3px] text-[11.5px] font-extrabold tracking-[0.02em]"
-              style={{ background: tagBg, color: tagFg }}
-            >
-              {tag}
-            </span>
-          );
-        })}
-      </div>
+      {card.tags.length > 0 && (
+        <div className={`mb-[9px] flex flex-wrap gap-1.5 ${padRight}`}>
+          {card.tags.map((tag) => {
+            const color = tagColors[tag] ?? FALLBACK_TAG_COLOR;
+            return (
+              <span
+                key={tag}
+                className="rounded-lg px-2.5 py-[3px] text-[11.5px] font-extrabold tracking-[0.02em]"
+                style={{ background: tagBg(color), color }}
+              >
+                {tag}
+              </span>
+            );
+          })}
+        </div>
+      )}
       <p
         className={`m-0 text-[15px] font-bold leading-[1.35] text-ink ${
           card.desc ? "mb-1" : "mb-3"

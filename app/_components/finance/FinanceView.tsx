@@ -3,14 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   addTransaction,
-  categoryColor,
-  CATEGORIES,
   deleteTransaction,
   formatMoney,
   formatTxDate,
   subscribeToTransactions,
   type Transaction,
 } from "@/lib/finance";
+import {
+  FALLBACK_TAG_COLOR,
+  financeColorMap,
+  useFinanceTags,
+} from "@/lib/tags";
 import CardSkeletons from "../board/CardSkeletons";
 import Icon from "../Icon";
 import { useUser } from "../UserContext";
@@ -53,6 +56,16 @@ export default function FinanceView() {
 
   useEffect(() => subscribeToTransactions(user.uid, setTxs), [user.uid]);
 
+  const financeTags = useFinanceTags(user.uid);
+  const expenseColors = useMemo(
+    () => financeColorMap(financeTags, "expense"),
+    [financeTags],
+  );
+  const incomeColors = useMemo(
+    () => financeColorMap(financeTags, "income"),
+    [financeTags],
+  );
+
   const { incomeTotal, expenseTotal, segments } = useMemo(() => {
     const list = txs ?? [];
     let incomeTotal = 0;
@@ -70,11 +83,11 @@ export default function FinanceView() {
       .map(([label, value]) => ({
         label,
         value,
-        color: CATEGORIES.expense[label] ?? "#9a8a92",
+        color: expenseColors[label] ?? FALLBACK_TAG_COLOR,
       }))
       .sort((a, b) => b.value - a.value);
     return { incomeTotal, expenseTotal, segments };
-  }, [txs]);
+  }, [txs, expenseColors]);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -189,7 +202,12 @@ export default function FinanceView() {
               >
                 <span
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ background: categoryColor(tx.type, tx.category) }}
+                  style={{
+                    background:
+                      (tx.type === "income" ? incomeColors : expenseColors)[
+                        tx.category
+                      ] ?? FALLBACK_TAG_COLOR,
+                  }}
                 />
                 <div className="min-w-0 flex-1 leading-tight">
                   <p className="m-0 truncate text-[14px] font-bold text-ink">
@@ -224,6 +242,7 @@ export default function FinanceView() {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onCreate={(data) => addTransaction(user.uid, data)}
+        tags={financeTags}
       />
     </div>
   );

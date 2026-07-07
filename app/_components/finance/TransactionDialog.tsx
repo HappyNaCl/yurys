@@ -1,35 +1,46 @@
 "use client";
 
 import { useState } from "react";
-import { CATEGORIES, type NewTransaction, type TxType } from "@/lib/finance";
+import { type NewTransaction, type TxType } from "@/lib/finance";
+import { financeTagOptions, type FinanceTag } from "@/lib/tags";
 import Dialog, { FieldLabel, inputClasses } from "../Dialog";
 
 export default function TransactionDialog({
   open,
   onClose,
   onCreate,
+  tags,
 }: {
   open: boolean;
   onClose: () => void;
   onCreate: (data: NewTransaction) => void;
+  tags: FinanceTag[] | null;
 }) {
   const [type, setType] = useState<TxType>("expense");
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("Food");
+  const [picked, setPicked] = useState<string | null>(null);
   const [note, setNote] = useState("");
+
+  // Categories can change (or still be loading) while the dialog is open, so
+  // the selection falls back to the first available option when stale.
+  const options = financeTagOptions(tags, type);
+  const category =
+    picked && options.some((o) => o.name === picked)
+      ? picked
+      : (options[0]?.name ?? "Other");
 
   const value = Number(amount);
   const valid = amount !== "" && Number.isFinite(value) && value > 0;
 
   function switchType(t: TxType) {
     setType(t);
-    setCategory(Object.keys(CATEGORIES[t])[0]);
+    setPicked(null);
   }
 
   function reset() {
     setType("expense");
     setAmount("");
-    setCategory("Food");
+    setPicked(null);
     setNote("");
   }
 
@@ -85,13 +96,13 @@ export default function TransactionDialog({
         <div className="flex flex-col gap-[7px]">
           <FieldLabel>Category</FieldLabel>
           <div className="flex flex-wrap gap-1.5">
-            {Object.entries(CATEGORIES[type]).map(([name, color]) => {
+            {options.map(({ name, color }) => {
               const selected = category === name;
               return (
                 <button
                   key={name}
                   type="button"
-                  onClick={() => setCategory(name)}
+                  onClick={() => setPicked(name)}
                   aria-pressed={selected}
                   className={`flex items-center gap-1.5 rounded-lg px-2.5 py-[5px] text-[12px] font-extrabold tracking-[0.02em] transition-colors ${
                     selected ? "text-white" : "bg-chip text-muted"

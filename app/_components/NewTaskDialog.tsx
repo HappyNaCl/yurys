@@ -1,17 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { TAGS, type NewCardData } from "@/lib/cards";
+import { type NewCardData } from "@/lib/cards";
+import { tagBg, type TagOption } from "@/lib/tags";
 import Dialog, { FieldLabel, inputClasses } from "./Dialog";
 
 export default function NewTaskDialog({
   open,
   onClose,
   onCreate,
+  tagOptions,
 }: {
   open: boolean;
   onClose: () => void;
   onCreate: (data: NewCardData) => void;
+  tagOptions: readonly TagOption[];
 }) {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
@@ -47,7 +50,7 @@ export default function NewTaskDialog({
       desc: desc.trim(),
       startDate: startDate || null,
       endDate: endDate || null,
-      tags: tags.length ? tags : ["Task"],
+      tags,
     });
     handleClose();
   }
@@ -103,20 +106,24 @@ export default function NewTaskDialog({
         <div className="flex flex-col gap-[7px]">
           <FieldLabel>Tags</FieldLabel>
           <div className="flex flex-wrap gap-1.5">
-            {Object.entries(TAGS).map(([tag, [bg, fg]]) => {
-              const selected = tags.includes(tag);
+            {tagOptions.map(({ name, color }) => {
+              const selected = tags.includes(name);
               return (
                 <button
-                  key={tag}
+                  key={name}
                   type="button"
-                  onClick={() => toggleTag(tag)}
+                  onClick={() => toggleTag(name)}
                   aria-pressed={selected}
                   className={`rounded-lg px-2.5 py-[5px] text-[12px] font-extrabold tracking-[0.02em] transition-[background,color,box-shadow] ${
                     selected ? "shadow-[0_0_0_2px_currentColor]" : ""
                   }`}
-                  style={selected ? { background: bg, color: fg } : undefined}
+                  style={
+                    selected
+                      ? { background: tagBg(color), color }
+                      : undefined
+                  }
                 >
-                  <span className={selected ? "" : "text-muted"}>{tag}</span>
+                  <span className={selected ? "" : "text-muted"}>{name}</span>
                 </button>
               );
             })}

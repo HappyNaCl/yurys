@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   addCard,
+  autoStartOverdueCards,
   COLUMNS,
   deleteCard,
   moveCard,
@@ -12,6 +13,7 @@ import {
   type ColumnId,
   type NewCardData,
 } from "@/lib/cards";
+import { todoColorMap, todoTagOptions, useTodoTags } from "@/lib/tags";
 import Icon from "./Icon";
 import CardSkeletons from "./board/CardSkeletons";
 import ColumnHeader from "./board/ColumnHeader";
@@ -31,6 +33,17 @@ export default function KanbanBoard() {
   const [menuId, setMenuId] = useState<string | null>(null);
 
   useEffect(() => subscribeToCards(user.uid, setCards), [user.uid]);
+
+  // Sweep started cards out of To Do once the first snapshot lands.
+  const sweptRef = useRef(false);
+  useEffect(() => {
+    if (cards === null || sweptRef.current) return;
+    sweptRef.current = true;
+    autoStartOverdueCards(user.uid, cards);
+  }, [cards, user.uid]);
+
+  const todoTags = useTodoTags(user.uid);
+  const tagColors = useMemo(() => todoColorMap(todoTags), [todoTags]);
 
   const columns = useMemo(
     () =>
@@ -146,6 +159,7 @@ export default function KanbanBoard() {
                 <TaskCard
                   key={card.id}
                   card={card}
+                  tagColors={tagColors}
                   draggable
                   onDragStart={(e) => {
                     setDragId(card.id);
@@ -229,6 +243,7 @@ export default function KanbanBoard() {
       {/* Board (mobile: swipeable stage pager) */}
       <MobileBoard
         columns={columns}
+        tagColors={tagColors}
         loading={cards === null}
         onMove={(id, col) => moveCard(user.uid, id, col)}
         onDelete={(id) => deleteCard(user.uid, id)}
@@ -238,6 +253,7 @@ export default function KanbanBoard() {
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         onCreate={createTodo}
+        tagOptions={todoTagOptions(todoTags)}
       />
     </div>
   );

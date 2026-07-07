@@ -23,11 +23,13 @@ type Column = (typeof COLUMNS)[number] & { cards: Card[] };
 
 export default function MobileBoard({
   columns,
+  tagColors,
   loading,
   onMove,
   onDelete,
 }: {
   columns: Column[];
+  tagColors: Record<string, string>;
   loading: boolean;
   onMove: (id: string, col: ColumnId) => void;
   onDelete: (id: string) => void;
@@ -86,6 +88,7 @@ export default function MobileBoard({
                   <TaskCard
                     key={card.id}
                     card={card}
+                    tagColors={tagColors}
                     corner={
                       <button
                         onClick={() => onDelete(card.id)}

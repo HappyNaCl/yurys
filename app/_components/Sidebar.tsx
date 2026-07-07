@@ -18,6 +18,7 @@ const NAV = [
   { href: "/", label: "Todo", icon: "view_kanban" },
   { href: "/reminders", label: "Reminders", icon: "notifications" },
   { href: "/finance", label: "Finance", icon: "account_balance_wallet" },
+  { href: "/tags", label: "Tags", icon: "sell" },
 ];
 
 function Logo() {

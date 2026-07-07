@@ -14,28 +14,6 @@ import { getDb } from "./firebase";
 
 export type TxType = "expense" | "income";
 
-export const CATEGORIES: Record<TxType, Record<string, string>> = {
-  expense: {
-    Food: "#dc2b54",
-    Transport: "#e08a2e",
-    Shopping: "#7c5cbf",
-    Bills: "#5b4a9e",
-    Health: "#38a186",
-    Fun: "#c4497f",
-    Other: "#9a8a92",
-  },
-  income: {
-    Salary: "#38a186",
-    Bonus: "#7c5cbf",
-    Gift: "#dc2b54",
-    Other: "#9a8a92",
-  },
-};
-
-export function categoryColor(type: TxType, category: string) {
-  return CATEGORIES[type][category] ?? "#9a8a92";
-}
-
 export type NewTransaction = {
   type: TxType;
   amount: number;

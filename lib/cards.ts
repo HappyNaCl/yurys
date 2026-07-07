@@ -23,17 +23,6 @@ export type ColumnId = (typeof COLUMNS)[number]["id"];
 
 const COLUMN_IDS = COLUMNS.map((c) => c.id) as readonly string[];
 
-export const TAGS: Record<string, [background: string, foreground: string]> = {
-  Research: ["#efe6fb", "#6b45b8"],
-  Marketing: ["#fce8ef", "#c21f5b"],
-  Design: ["#fbe3ea", "#c61e48"],
-  Bug: ["#fbe0de", "#c63a2e"],
-  Docs: ["#eee9f6", "#5e4b8c"],
-  Feature: ["#fce5ef", "#b32877"],
-  Backend: ["#e9e4f4", "#5b4a9e"],
-  Task: ["#f0e6ea", "#7a6b73"],
-};
-
 export type NewCardData = {
   title: string;
   desc: string;
@@ -134,6 +123,20 @@ export function addCard(uid: string, data: NewCardData, order: number) {
 
 export function moveCard(uid: string, id: string, col: ColumnId) {
   return updateDoc(doc(getDb(), "users", uid, "todos", id), { col });
+}
+
+// A To-Do card whose start date is already behind us has effectively started —
+// move it to In Progress. Run once per board load, so a card the user then
+// drags back to To Do stays put until the next visit.
+export function autoStartOverdueCards(uid: string, cards: Card[]) {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  for (const card of cards) {
+    if (card.col === "todo" && card.startDate && card.startDate <= today) {
+      moveCard(uid, card.id, "doing");
+    }
+  }
 }
 
 // Move a card to a column at a specific priority slot.
