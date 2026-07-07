@@ -1,0 +1,11 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Each user can only read/write their own data (todos, transactions,
+    // and any future per-user collections).
+    match /users/{userId}/{collectionId}/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

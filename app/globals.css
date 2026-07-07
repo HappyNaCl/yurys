@@ -1,26 +1,128 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Theme-flippable palette. `.theme-light` pins a subtree (e.g. the login
+   page) to light values regardless of the active theme. */
+:root,
+.theme-light {
+  --background: #f4eef0;
+  --foreground: #2b1e2c;
+  --card: #ffffff;
+  --ink: #2b1e2c;
+  --ink-soft: #56454e;
+  --muted: #9a8a92;
+  --muted-soft: #a5949c;
+  --faint: #b7a7af;
+  --line: #eadfe3;
+  --line-soft: #efe6ea;
+  --panel: #fbf7f9;
+  --chip: #f0e6ea;
+}
+
+:root,
+.theme-light {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #1a111b;
+  --foreground: #f2e9ee;
+  --card: #261b28;
+  --ink: #f2e9ee;
+  --ink-soft: #d9c9d2;
+  --muted: #a18d99;
+  --muted-soft: #8b7883;
+  --faint: #6e5d67;
+  --line: #3b2c3d;
+  --line-soft: #322535;
+  --panel: #211622;
+  --chip: #352638;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-muted-soft: var(--muted-soft);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-panel: var(--panel);
+  --color-chip: var(--chip);
+  --font-sans: var(--font-nunito);
+  --font-display: var(--font-fredoka);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  --color-primary: #dc2b54;
+  --color-primary-deep: #c21f46;
+  --color-plum: #7c5cbf;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-nunito), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 20px;
+  border: 2px solid var(--background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--faint);
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 500,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes float-dot {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
 }
