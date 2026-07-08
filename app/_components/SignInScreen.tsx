@@ -57,14 +57,14 @@ export default function SignInScreen() {
 
   return (
     <main className="theme-light flex min-h-dvh flex-1 items-center justify-center bg-[radial-gradient(circle_at_20%_20%,#f7eef2,#efe4ea)] p-4 sm:p-8">
-      <div className="grid w-full max-w-[960px] overflow-hidden rounded-[28px] border border-line-soft bg-white shadow-[0_40px_90px_-40px_rgba(43,30,44,0.45)] md:grid-cols-[1.05fr_1fr]">
+      <div className="grid w-full max-w-240 overflow-hidden rounded-[28px] border border-line-soft bg-white shadow-[0_40px_90px_-40px_rgba(43,30,44,0.45)] md:grid-cols-[1.05fr_1fr]">
         {/* Art panel */}
-        <div className="relative flex min-h-[240px] flex-col overflow-hidden bg-[linear-gradient(160deg,#dc2b54_0%,#a62a6e_48%,#3a2340_100%)] md:min-h-[560px]">
+        <div className="relative flex min-h-60-col overflow-hidden bg-[linear-gradient(160deg,#dc2b54_0%,#a62a6e_48%,#3a2340_100%)] md:min-h-140">
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(43,30,44,0.05)_0%,rgba(43,30,44,0.55)_100%)]" />
-          <div className="pointer-events-none absolute -right-[30px] top-11 h-[120px] w-[120px] rotate-30 animate-[float-dot_7s_ease-in-out_infinite] rounded-[40px] bg-white/12" />
-          <div className="pointer-events-none absolute -left-6 bottom-[140px] h-20 w-20 animate-[float-dot_5.5s_ease-in-out_infinite] rounded-full bg-plum/35" />
+          <div className="pointer-events-none absolute -right-7.5 top-11 h-30 w-30te-30 animate-[float-dot_7s_ease-in-out_infinite] rounded-[40px] bg-white/12" />
+          <div className="pointer-events-none absolute -left-6 bottom-35 h-20 w-20 animate-[float-dot_5.5s_ease-in-out_infinite] rounded-full bg-plum/35" />
 
-          <div className="pointer-events-none relative z-[2] flex items-center gap-[11px] p-6 md:p-10">
+          <div className="pointer-events-none relative z-2 flex items-center gap-2.75 p-6 md:p-10">
             <img
               src="/favicon.svg"
               alt=""
@@ -77,7 +77,7 @@ export default function SignInScreen() {
             </span>
           </div>
 
-          <div className="pointer-events-none relative z-[2] mt-auto p-6 md:p-10">
+          <div className="pointer-events-none relative z-2 mt-auto p-6 md:p-10">
             <h2 className="m-0 mb-2.5 text-balance font-display text-2xl font-semibold leading-[1.15] text-white md:text-[30px]">
               Bring your ideas into motion.
             </h2>
@@ -88,19 +88,19 @@ export default function SignInScreen() {
         </div>
 
         {/* Form panel */}
-        <div className="flex flex-col justify-center p-8 md:px-[52px] md:py-14">
+        <div className="flex flex-col justify-center p-8 md:px-13 md:py-14">
           <span className="text-[13.5px] font-bold uppercase tracking-[0.04em] text-primary">
             Welcome back
           </span>
           <h1 className="mb-1.5 mt-2 font-display text-[30px] font-semibold text-ink">
             Sign in
           </h1>
-          <p className="mb-[30px] text-[14.5px] font-semibold text-muted">
+          <p className="mb-7.5 text-[14.5px] font-semibold text-muted">
             Sign in to continue to your board.
           </p>
 
-          <form onSubmit={handleSignIn} className="flex flex-col gap-[18px]">
-            <label className="flex flex-col gap-[7px]">
+          <form onSubmit={handleSignIn} className="flex flex-col gap-4.5">
+            <label className="flex flex-col gap-1.75">
               <span className="text-[13.5px] font-extrabold text-ink-soft">
                 Email
               </span>
@@ -115,7 +115,7 @@ export default function SignInScreen() {
               />
             </label>
 
-            <label className="flex flex-col gap-[7px]">
+            <label className="flex flex-col gap-1.75">
               <div className="flex items-baseline justify-between">
                 <span className="text-[13.5px] font-extrabold text-ink-soft">
                   Password
@@ -129,13 +129,13 @@ export default function SignInScreen() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`${inputClasses} pr-[46px]`}
+                  className={`${inputClasses} pr-11.5`}
                 />
                 <button
                   type="button"
                   onClick={() => setShow((s) => !s)}
                   aria-label={show ? "Hide password" : "Show password"}
-                  className="absolute right-1.5 top-1/2 flex h-[34px] w-[34px] -translate-y-1/2 items-center justify-center rounded-[9px] text-muted-soft transition-colors hover:bg-primary/6 hover:text-primary">
+                  className="absolute right-1.5 top-1/2 flex h-8.5 w-8.5 -translate-y-1/2 items-center justify-center rounded-[9px] text-muted-soft transition-colors hover:bg-primary/6 hover:text-primary">
                   <Icon
                     name={show ? "visibility_off" : "visibility"}
                     size={20}
@@ -144,12 +144,12 @@ export default function SignInScreen() {
               </div>
             </label>
 
-            <label className="flex cursor-pointer select-none items-center gap-[9px]">
+            <label className="flex cursor-pointer select-none items-center gap-2.25">
               <input
                 type="checkbox"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
-                className="h-[18px] w-[18px] cursor-pointer accent-primary"
+                className="h-4.5 w-4.5 cursor-pointer accent-primary"
               />
               <span className="text-[13.5px] font-bold text-ink-soft">
                 Keep me signed in

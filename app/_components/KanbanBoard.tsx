@@ -99,7 +99,7 @@ export default function KanbanBoard() {
   return (
     <div className="flex flex-1 flex-col">
       {/* Page toolbar */}
-      <div className="flex flex-wrap items-center gap-4 px-4 pb-1 pt-[26px] sm:px-7">
+      <div className="flex flex-wrap items-center gap-4 px-4 pb-1 pt-6.5 sm:px-7">
         <div className="mr-1 flex flex-col leading-[1.15] gap-4">
           <h1 className="m-0 font-display text-[26px] font-semibold text-ink">
             To-do list
@@ -113,14 +113,14 @@ export default function KanbanBoard() {
 
         <button
           onClick={() => setDialogOpen(true)}
-          className="flex items-center gap-[7px] rounded-xl bg-primary px-[18px] py-[11px] font-display text-[14.5px] font-semibold text-white shadow-[0_6px_16px_-6px_rgba(220,43,84,0.6)] transition-colors hover:bg-primary-deep">
+          className="flex items-center gap-1.75 rounded-xl bg-primary px-4.5 py-2.75ont-display text-[14.5px] font-semibold text-white shadow-[0_6px_16px_-6px_rgba(220,43,84,0.6)] transition-colors hover:bg-primary-deep">
           <Icon name="add" size={18} />
           New task
         </button>
       </div>
 
       {/* Board (desktop: drag-and-drop columns) */}
-      <main className="hidden flex-1 items-start gap-5 overflow-x-auto px-4 pb-[calc(env(safe-area-inset-bottom)+34px)] pt-[18px] sm:px-7 md:flex">
+      <main className="hidden flex-1 items-start gap-5 overflow-x-auto px-4 pb-[calc(env(safe-area-inset-bottom)+34px)] pt-4.5 sm:px-7 md:flex">
         {columns.map((col) => (
           <section
             key={col.id}
@@ -137,7 +137,7 @@ export default function KanbanBoard() {
               e.preventDefault();
               handleDropOnColumn(col.id);
             }}
-            className={`flex max-h-full min-w-[280px] flex-[1_1_280px] flex-col rounded-[18px] border-[1.5px] transition-colors ${
+            className={`flex max-h-full min-w-70 flex-[1_1_280px] flex-col rounded-[18px] border-[1.5px] transition-colors ${
               dragOverCol === col.id
                 ? "border-[#f0b7c6] bg-primary/6"
                 : "border-line-soft bg-panel"
@@ -148,7 +148,7 @@ export default function KanbanBoard() {
               count={col.cards.length}
             />
 
-            <div className="flex flex-col gap-[11px] overflow-y-auto px-3 pb-3.5 pt-1">
+            <div className="flex flex-col gap-2.75 overflow-y-auto px-3 pb-3.5 pt-1">
               {cards === null && <CardSkeletons className="h-24" />}
 
               {cards !== null && col.cards.length === 0 && (

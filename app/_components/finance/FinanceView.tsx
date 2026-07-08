@@ -94,7 +94,7 @@ export default function FinanceView() {
   return (
     <div className="flex flex-1 flex-col">
       {/* Page toolbar */}
-      <div className="flex flex-wrap items-center gap-4 px-4 pb-1 pt-[26px] sm:px-7">
+      <div className="flex flex-wrap items-center gap-4 px-4 pb-1 pt-6.5 sm:px-7">
         <div className="mr-1 flex flex-col gap-4 leading-[1.15]">
           <h1 className="m-0 font-display text-[26px] font-semibold text-ink">
             Finance
@@ -108,13 +108,13 @@ export default function FinanceView() {
 
         <button
           onClick={() => setDialogOpen(true)}
-          className="flex items-center gap-[7px] rounded-xl bg-primary px-[18px] py-[11px] font-display text-[14.5px] font-semibold text-white shadow-[0_6px_16px_-6px_rgba(220,43,84,0.6)] transition-colors hover:bg-primary-deep">
+          className="flex items-center gap-1.75 rounded-xl bg-primary px-4.5-py-2.75nt-display text-[14.5px] font-semibold text-white shadow-[0_6px_16px_-6px_rgba(220,43,84,0.6)] transition-colors hover:bg-primary-deep">
           <Icon name="add" size={18} />
           Add transaction
         </button>
       </div>
 
-      <div className="grid items-start gap-5 px-4 pb-[calc(env(safe-area-inset-bottom)+34px)] pt-[18px] sm:px-7 lg:grid-cols-2">
+      <div className="grid items-start gap-5 px-4 pb-[calc(env(safe-area-inset-bottom)+34px)] pt-4.5 sm:px-7 lg:grid-cols-2">
         {/* Left: stats + category chart */}
         <section className="flex flex-col gap-5">
           <div className="grid grid-rows-2 gap-5">

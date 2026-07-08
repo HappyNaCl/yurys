@@ -29,19 +29,17 @@ export default function TaskCard({
   return (
     <article
       className={`relative rounded-[14px] border-[1.5px] border-line-soft bg-card p-3.5 shadow-[0_2px_6px_-3px_rgba(43,30,44,0.12)] ${className}`}
-      {...articleProps}
-    >
+      {...articleProps}>
       {corner}
       {card.tags.length > 0 && (
-        <div className={`mb-[9px] flex flex-wrap gap-1.5 ${padRight}`}>
+        <div className={`mb-2.25 flex flex-wrap gap-1.5 ${padRight}`}>
           {card.tags.map((tag) => {
             const color = tagColors[tag] ?? FALLBACK_TAG_COLOR;
             return (
               <span
                 key={tag}
-                className="rounded-lg px-2.5 py-[3px] text-[11.5px] font-extrabold tracking-[0.02em]"
-                style={{ background: tagBg(color), color }}
-              >
+                className="rounded-lg px-2.5 py-0.75 text-[11.5px] font-extrabold tracking-[0.02em]"
+                style={{ background: tagBg(color), color }}>
                 {tag}
               </span>
             );
@@ -51,14 +49,12 @@ export default function TaskCard({
       <p
         className={`m-0 text-[15px] font-bold leading-[1.35] text-ink ${
           card.desc ? "mb-1" : "mb-3"
-        } ${padRight}`}
-      >
+        } ${padRight}`}>
         {card.title}
       </p>
       {card.desc && (
         <p
-          className={`m-0 mb-3 line-clamp-2 text-[13px] font-semibold leading-snug text-muted ${padRight}`}
-        >
+          className={`m-0 mb-3 line-clamp-2 text-[13px] font-semibold leading-snug text-muted ${padRight}`}>
           {card.desc}
         </p>
       )}

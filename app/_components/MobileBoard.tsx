@@ -101,7 +101,7 @@ export default function MobileBoard({
                       nextStep && (
                         <button
                           onClick={() => onMove(card.id, nextStep)}
-                          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border-[1.5px] border-line bg-card py-[10px] text-[13.5px] font-bold text-ink-soft transition-colors active:bg-chip">
+                          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border-[1.5px] border-line bg-card py-2.5 text-[13.5px] font-bold text-ink-soft transition-colors active:bg-chip">
                           <span
                             className="h-2 w-2 rounded-full"
                             style={{
