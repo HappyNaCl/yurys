@@ -108,7 +108,7 @@ export default function FinanceView() {
 
         <button
           onClick={() => setDialogOpen(true)}
-          className="flex items-center gap-1.75 rounded-xl bg-primary px-4.5-py-2.75nt-display text-[14.5px] font-semibold text-white shadow-[0_6px_16px_-6px_rgba(220,43,84,0.6)] transition-colors hover:bg-primary-deep">
+          className="flex items-center gap-1.75 rounded-xl bg-primary px-4.5 py-2.75 font-display text-[14.5px] font-semibold text-white shadow-[0_6px_16px_-6px_rgba(220,43,84,0.6)] transition-colors hover:bg-primary-deep">
           <Icon name="add" size={18} />
           Add transaction
         </button>
