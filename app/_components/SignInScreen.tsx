@@ -60,15 +60,11 @@ export default function SignInScreen() {
       <div className="grid w-full max-w-[960px] overflow-hidden rounded-[28px] border border-line-soft bg-white shadow-[0_40px_90px_-40px_rgba(43,30,44,0.45)] md:grid-cols-[1.05fr_1fr]">
         {/* Art panel */}
         <div className="relative flex min-h-[240px] flex-col overflow-hidden bg-[linear-gradient(160deg,#dc2b54_0%,#a62a6e_48%,#3a2340_100%)] md:min-h-[560px]">
-          {/* Optional character art: drop a file at public/login-art.png and it
-              layers over the gradient; missing file just shows the gradient. */}
-          <div className="absolute inset-0 bg-[url('/login-art.png')] bg-cover bg-center" />
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(43,30,44,0.05)_0%,rgba(43,30,44,0.55)_100%)]" />
           <div className="pointer-events-none absolute -right-[30px] top-11 h-[120px] w-[120px] rotate-30 animate-[float-dot_7s_ease-in-out_infinite] rounded-[40px] bg-white/12" />
           <div className="pointer-events-none absolute -left-6 bottom-[140px] h-20 w-20 animate-[float-dot_5.5s_ease-in-out_infinite] rounded-full bg-plum/35" />
 
           <div className="pointer-events-none relative z-[2] flex items-center gap-[11px] p-6 md:p-10">
-            {/* eslint-disable-next-line @next/next/no-img-element -- tiny static asset, skip the optimizer */}
             <img
               src="/favicon.svg"
               alt=""
@@ -124,13 +120,6 @@ export default function SignInScreen() {
                 <span className="text-[13.5px] font-extrabold text-ink-soft">
                   Password
                 </span>
-                <button
-                  type="button"
-                  onClick={handleForgot}
-                  className="text-sm font-bold text-primary transition-colors hover:text-[#b81e43]"
-                >
-                  Forgot?
-                </button>
               </div>
               <div className="relative flex">
                 <input
@@ -146,8 +135,7 @@ export default function SignInScreen() {
                   type="button"
                   onClick={() => setShow((s) => !s)}
                   aria-label={show ? "Hide password" : "Show password"}
-                  className="absolute right-1.5 top-1/2 flex h-[34px] w-[34px] -translate-y-1/2 items-center justify-center rounded-[9px] text-muted-soft transition-colors hover:bg-primary/6 hover:text-primary"
-                >
+                  className="absolute right-1.5 top-1/2 flex h-[34px] w-[34px] -translate-y-1/2 items-center justify-center rounded-[9px] text-muted-soft transition-colors hover:bg-primary/6 hover:text-primary">
                   <Icon
                     name={show ? "visibility_off" : "visibility"}
                     size={20}
@@ -171,8 +159,7 @@ export default function SignInScreen() {
             <button
               type="submit"
               disabled={busy}
-              className="mt-1 rounded-[13px] bg-primary p-3.5 font-display text-base font-semibold text-white shadow-[0_12px_26px_-12px_rgba(220,43,84,0.75)] transition-colors hover:bg-primary-deep active:translate-y-px disabled:opacity-60"
-            >
+              className="mt-1 rounded-[13px] bg-primary p-3.5 font-display text-base font-semibold text-white shadow-[0_12px_26px_-12px_rgba(220,43,84,0.75)] transition-colors hover:bg-primary-deep active:translate-y-px disabled:opacity-60">
               {busy ? "Signing in…" : "Sign in"}
             </button>
 
@@ -181,8 +168,7 @@ export default function SignInScreen() {
                 role="alert"
                 className={`text-center text-sm font-bold ${
                   notice.kind === "error" ? "text-primary" : "text-ink-soft"
-                }`}
-              >
+                }`}>
                 {notice.text}
               </p>
             )}
