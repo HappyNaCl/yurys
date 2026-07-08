@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   addTransaction,
   deleteTransaction,
+  fetchBalance,
   formatMoney,
   formatTxDate,
   subscribeToTransactions,
@@ -29,7 +30,7 @@ function StatCard({
   label: string;
   icon: string;
   color: string;
-  amount: number;
+  amount: number | null; // null while still loading
 }) {
   return (
     <div className="flex items-center gap-3 rounded-[18px] border-[1.5px] border-line-soft bg-panel p-4">
@@ -40,8 +41,11 @@ function StatCard({
       </span>
       <div className="min-w-0 leading-tight">
         <p className="m-0 text-[12.5px] font-bold text-muted">{label}</p>
-        <p className="m-0 truncate font-display text-[17px] font-semibold text-ink">
-          {formatMoney(amount)}
+        <p
+          className={`m-0 truncate font-display text-[17px] font-semibold ${
+            amount !== null && amount < 0 ? "text-primary" : "text-ink"
+          }`}>
+          {amount === null ? "…" : formatMoney(amount)}
         </p>
       </div>
     </div>
@@ -54,6 +58,22 @@ export default function FinanceView() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => subscribeToTransactions(user.uid, setTxs), [user.uid]);
+
+  // All-time balance. Aggregations aren't realtime, so re-fetch whenever the
+  // month snapshot changes — i.e. right after every add/delete here.
+  const [balance, setBalance] = useState<number | null>(null);
+  useEffect(() => {
+    if (txs === null) return;
+    let stale = false;
+    fetchBalance(user.uid)
+      .then((b) => {
+        if (!stale) setBalance(b);
+      })
+      .catch(() => {}); // offline etc. — keep the last known balance
+    return () => {
+      stale = true;
+    };
+  }, [user.uid, txs]);
 
   const financeTags = useFinanceTags(user.uid);
   const expenseColors = useMemo(
@@ -117,7 +137,13 @@ export default function FinanceView() {
       <div className="grid items-start gap-5 px-4 pb-[calc(env(safe-area-inset-bottom)+34px)] pt-4.5 sm:px-7 lg:grid-cols-2">
         {/* Left: stats + category chart */}
         <section className="flex flex-col gap-5">
-          <div className="grid grid-rows-2 gap-5">
+          <div className="grid grid-rows-3 gap-5">
+            <StatCard
+              label="Balance"
+              icon="account_balance_wallet"
+              color="#7c5cbf"
+              amount={balance}
+            />
             <StatCard
               label="Income"
               icon="arrow_upward"

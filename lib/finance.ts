@@ -3,10 +3,12 @@ import {
   collection,
   deleteDoc,
   doc,
+  getAggregateFromServer,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
+  sum,
   Timestamp,
   where,
 } from "firebase/firestore";
@@ -71,6 +73,22 @@ export function subscribeToTransactions(
       }),
     );
   });
+}
+
+// All-time balance (income − spending), summed server-side so no transaction
+// documents are downloaded. Aggregations can't be subscribed to — callers
+// re-fetch when the month snapshot changes (i.e. after each add/delete).
+export async function fetchBalance(uid: string) {
+  const txs = txCollection(uid);
+  const [income, expense] = await Promise.all([
+    getAggregateFromServer(query(txs, where("type", "==", "income")), {
+      total: sum("amount"),
+    }),
+    getAggregateFromServer(query(txs, where("type", "==", "expense")), {
+      total: sum("amount"),
+    }),
+  ]);
+  return income.data().total - expense.data().total;
 }
 
 export function addTransaction(uid: string, data: NewTransaction) {

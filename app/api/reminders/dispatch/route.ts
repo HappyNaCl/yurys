@@ -55,6 +55,7 @@ async function dispatch() {
 
   let processed = 0;
   let sent = 0;
+  let failed = 0;
 
   for (const [uid, docs] of byUser) {
     const subsSnap = await db
@@ -91,6 +92,15 @@ async function dispatch() {
               await subsSnap.docs
                 .find((d) => d.id === sub.id)
                 ?.ref.delete();
+            } else {
+              // Anything else (403 = VAPID key mismatch, 413, network…) must
+              // not fail silently — it means the user never got the reminder.
+              failed++;
+              console.error(
+                `push to ${sub.endpoint} failed:`,
+                code,
+                (err as { body?: string }).body ?? err,
+              );
             }
           }
         }),
@@ -106,7 +116,7 @@ async function dispatch() {
     }
   }
 
-  return { ok: true, processed, sent };
+  return { ok: true, processed, sent, failed };
 }
 
 function authorized(request: Request) {
