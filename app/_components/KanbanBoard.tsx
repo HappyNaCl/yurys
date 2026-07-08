@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   addCard,
   autoStartOverdueCards,
@@ -30,7 +31,15 @@ export default function KanbanBoard() {
   const [dragOverCol, setDragOverCol] = useState<ColumnId | null>(null);
   const [dragOverCardId, setDragOverCardId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [menuId, setMenuId] = useState<string | null>(null);
+  // Card-actions menu, rendered in a portal so the column's overflow clipping
+  // and the cards' hover transforms can't hide it. Anchored to the ⋯ button's
+  // viewport rect, captured when it's clicked.
+  const [menu, setMenu] = useState<{
+    id: string;
+    right: number;
+    top: number;
+    bottom: number;
+  } | null>(null);
 
   useEffect(() => subscribeToCards(user.uid, setCards), [user.uid]);
 
@@ -95,6 +104,8 @@ export default function KanbanBoard() {
     const order = prev ? (prev.order + target.order) / 2 : target.order - 1;
     placeCard(user.uid, id, colId, order);
   }
+
+  const menuCard = menu ? (cards ?? []).find((c) => c.id === menu.id) : null;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -190,48 +201,23 @@ export default function KanbanBoard() {
                   }`}
                   dateRowExtra={
                     <button
-                      onClick={() =>
-                        setMenuId((m) => (m === card.id ? null : card.id))
-                      }
+                      onClick={(e) => {
+                        const r = e.currentTarget.getBoundingClientRect();
+                        setMenu((m) =>
+                          m?.id === card.id
+                            ? null
+                            : {
+                                id: card.id,
+                                right: r.right,
+                                top: r.top,
+                                bottom: r.bottom,
+                              },
+                        );
+                      }}
                       aria-label={`Actions for "${card.title}"`}
                       className="ml-auto rounded-lg px-1.5 py-0.5 text-muted-soft transition-colors hover:bg-chip hover:text-ink-soft">
                       <Icon name="more_horiz" size={18} />
                     </button>
-                  }
-                  footer={
-                    menuId === card.id && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-30"
-                          onClick={() => setMenuId(null)}
-                        />
-                        <div className="absolute right-2 top-full z-40 -mt-1 flex w-44 flex-col overflow-hidden rounded-xl border-[1.5px] border-line-soft bg-card py-1 shadow-[0_16px_36px_-16px_rgba(43,30,44,0.4)]">
-                          {COLUMNS.filter((c) => c.id !== card.col).map((c) => (
-                            <button
-                              key={c.id}
-                              onClick={() => {
-                                moveCard(user.uid, card.id, c.id);
-                                setMenuId(null);
-                              }}
-                              className="flex items-center gap-2.5 px-3.5 py-2 text-left text-[13.5px] font-bold text-ink-soft transition-colors hover:bg-panel">
-                              <span
-                                className="h-2 w-2 rounded-full"
-                                style={{ background: c.dot }}
-                              />
-                              Move to {c.title}
-                            </button>
-                          ))}
-                          <button
-                            onClick={() => {
-                              deleteCard(user.uid, card.id);
-                              setMenuId(null);
-                            }}
-                            className="px-3.5 py-2 text-left text-[13.5px] font-bold text-primary transition-colors hover:bg-primary/6">
-                            Delete
-                          </button>
-                        </div>
-                      </>
-                    )
                   }
                 />
               ))}
@@ -239,6 +225,53 @@ export default function KanbanBoard() {
           </section>
         ))}
       </main>
+
+      {/* Card-actions menu — portaled to <body> so column scroll clipping and
+          card hover transforms can't hide it. */}
+      {menu &&
+        menuCard &&
+        createPortal(
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setMenu(null)} />
+            <div
+              className="fixed z-50 flex w-44 flex-col overflow-hidden rounded-xl border-[1.5px] border-line-soft bg-card py-1 shadow-[0_16px_36px_-16px_rgba(43,30,44,0.4)]"
+              style={
+                // Flip above the button when there's no room below.
+                menu.bottom + 190 > window.innerHeight
+                  ? {
+                      left: menu.right - 176,
+                      top: menu.top - 4,
+                      transform: "translateY(-100%)",
+                    }
+                  : { left: menu.right - 176, top: menu.bottom + 4 }
+              }>
+              {COLUMNS.filter((c) => c.id !== menuCard.col).map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => {
+                    moveCard(user.uid, menuCard.id, c.id);
+                    setMenu(null);
+                  }}
+                  className="flex items-center gap-2.5 px-3.5 py-2 text-left text-[13.5px] font-bold text-ink-soft transition-colors hover:bg-panel">
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{ background: c.dot }}
+                  />
+                  Move to {c.title}
+                </button>
+              ))}
+              <button
+                onClick={() => {
+                  deleteCard(user.uid, menuCard.id);
+                  setMenu(null);
+                }}
+                className="px-3.5 py-2 text-left text-[13.5px] font-bold text-primary transition-colors hover:bg-primary/6">
+                Delete
+              </button>
+            </div>
+          </>,
+          document.body,
+        )}
 
       {/* Board (mobile: swipeable stage pager) */}
       <MobileBoard
