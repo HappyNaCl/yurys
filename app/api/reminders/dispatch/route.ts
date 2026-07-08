@@ -83,6 +83,14 @@ async function dispatch() {
             await webpush.sendNotification(
               { endpoint: sub.endpoint, keys: sub.keys },
               payload,
+              {
+                // High urgency wakes a dozing/screen-off device instead of
+                // deferring delivery until the user next opens the browser.
+                urgency: "high",
+                // Keep undelivered reminders queued for a day (e.g. phone off
+                // overnight) rather than web-push's 4-week default.
+                TTL: 24 * 60 * 60,
+              },
             );
             sent++;
           } catch (err) {
