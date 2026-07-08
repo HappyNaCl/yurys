@@ -59,10 +59,11 @@ export default function SignInScreen() {
     <main className="theme-light flex min-h-dvh flex-1 items-center justify-center bg-[radial-gradient(circle_at_20%_20%,#f7eef2,#efe4ea)] p-4 sm:p-8">
       <div className="grid w-full max-w-240 overflow-hidden rounded-[28px] border border-line-soft bg-white shadow-[0_40px_90px_-40px_rgba(43,30,44,0.45)] md:grid-cols-[1.05fr_1fr]">
         {/* Art panel */}
-        <div className="relative flex min-h-60-col overflow-hidden bg-[linear-gradient(160deg,#dc2b54_0%,#a62a6e_48%,#3a2340_100%)] md:min-h-140">
+        {/* On mobile this collapses to a slim brand bar: logo + name only. */}
+        <div className="relative flex flex-col overflow-hidden bg-[linear-gradient(160deg,#dc2b54_0%,#a62a6e_48%,#3a2340_100%)] md:min-h-140">
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(43,30,44,0.05)_0%,rgba(43,30,44,0.55)_100%)]" />
-          <div className="pointer-events-none absolute -right-7.5 top-11 h-30 w-30te-30 animate-[float-dot_7s_ease-in-out_infinite] rounded-[40px] bg-white/12" />
-          <div className="pointer-events-none absolute -left-6 bottom-35 h-20 w-20 animate-[float-dot_5.5s_ease-in-out_infinite] rounded-full bg-plum/35" />
+          <div className="pointer-events-none absolute -right-7.5 top-11 hidden h-30 w-30 rotate-30 animate-[float-dot_7s_ease-in-out_infinite] rounded-[40px] bg-white/12 md:block" />
+          <div className="pointer-events-none absolute -left-6 bottom-35 hidden h-20 w-20 animate-[float-dot_5.5s_ease-in-out_infinite] rounded-full bg-plum/35 md:block" />
 
           <div className="pointer-events-none relative z-2 flex items-center gap-2.75 p-6 md:p-10">
             <img
@@ -77,8 +78,8 @@ export default function SignInScreen() {
             </span>
           </div>
 
-          <div className="pointer-events-none relative z-2 mt-auto p-6 md:p-10">
-            <h2 className="m-0 mb-2.5 text-balance font-display text-2xl font-semibold leading-[1.15] text-white md:text-[30px]">
+          <div className="pointer-events-none relative z-2 mt-auto hidden p-10 md:block">
+            <h2 className="m-0 mb-2.5 text-balance font-display text-[30px] font-semibold leading-[1.15] text-white">
               Bring your ideas into motion.
             </h2>
             <p className="m-0 text-[15px] font-semibold leading-normal text-white/82">
