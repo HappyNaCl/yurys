@@ -3,23 +3,39 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   addTransaction,
+  currentMonthKey,
   deleteTransaction,
   fetchBalance,
+  fetchEarliestMonth,
   formatMoney,
-  formatTxDate,
+  importTransactions,
+  monthKeyOf,
+  monthLabel,
+  monthsSince,
   subscribeToTransactions,
+  type ImportedTransaction,
+  type MonthKey,
   type Transaction,
 } from "@/lib/finance";
+import { downloadTemplateCsv } from "@/lib/financeCsv";
 import {
   FALLBACK_TAG_COLOR,
   financeColorMap,
   useFinanceTags,
 } from "@/lib/tags";
-import CardSkeletons from "../board/CardSkeletons";
 import Icon from "../Icon";
 import { useUser } from "../UserContext";
+import DailySpendChart from "./DailySpendChart";
 import Donut from "./Donut";
+import ImportDialog from "./ImportDialog";
+import MonthPicker from "./MonthPicker";
 import TransactionDialog from "./TransactionDialog";
+import TransactionsPanel from "./TransactionsPanel";
+
+// Toolbar buttons that sit next to the primary "Add transaction" action.
+// Callers supply the display class so they can hide themselves responsively.
+const secondaryButton =
+  "items-center gap-1.5 rounded-xl border-[1.5px] border-line bg-panel px-3.5 py-2.75 font-display text-[14px] font-semibold text-ink-soft transition-colors hover:bg-chip";
 
 function StatCard({
   label,
@@ -54,10 +70,49 @@ function StatCard({
 
 export default function FinanceView() {
   const user = useUser();
-  const [txs, setTxs] = useState<Transaction[] | null>(null);
+  const [month, setMonth] = useState<MonthKey>(currentMonthKey);
+  // The snapshot is tagged with the month it belongs to, so switching months
+  // falls back to the loading state instead of flashing the old month's rows.
+  const [snapshot, setSnapshot] = useState<{
+    month: MonthKey;
+    txs: Transaction[];
+  } | null>(null);
+  const txs = snapshot?.month === month ? snapshot.txs : null;
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  // Day of the month picked from the chart; narrows the transaction list only.
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  // Bumped after an import, which can add months (and balance) the live
+  // month snapshot below wouldn't notice.
+  const [imported, setImported] = useState(0);
 
-  useEffect(() => subscribeToTransactions(user.uid, setTxs), [user.uid]);
+  useEffect(
+    () =>
+      subscribeToTransactions(user.uid, month, (list) =>
+        setSnapshot({ month, txs: list }),
+      ),
+    [user.uid, month],
+  );
+
+  // Months the user actually has data in, newest first.
+  const [earliest, setEarliest] = useState<MonthKey | null>(null);
+  useEffect(() => {
+    let stale = false;
+    fetchEarliestMonth(user.uid)
+      .then((m) => {
+        if (!stale) setEarliest(m);
+      })
+      .catch(() => {}); // offline — fall back to the current month only
+    return () => {
+      stale = true;
+    };
+  }, [user.uid, imported]);
+
+  const months = useMemo(() => {
+    const list = monthsSince(earliest);
+    // Keep the selected month reachable even if it predates the oldest doc.
+    return list.includes(month) ? list : [...list, month].sort().reverse();
+  }, [earliest, month]);
 
   // All-time balance. Aggregations aren't realtime, so re-fetch whenever the
   // month snapshot changes — i.e. right after every add/delete here.
@@ -73,7 +128,20 @@ export default function FinanceView() {
     return () => {
       stale = true;
     };
-  }, [user.uid, txs]);
+  }, [user.uid, txs, imported]);
+
+  // A day number only means something within its month.
+  function changeMonth(next: MonthKey) {
+    setMonth(next);
+    setSelectedDay(null);
+  }
+
+  async function handleImport(rows: ImportedTransaction[]) {
+    await importTransactions(user.uid, rows);
+    setImported((n) => n + 1);
+    // Jump to the month the imported rows landed in so they're visible.
+    changeMonth(monthKeyOf(rows[0].createdAt));
+  }
 
   const financeTags = useFinanceTags(user.uid);
   const expenseColors = useMemo(
@@ -120,11 +188,28 @@ export default function FinanceView() {
             Finance
           </h1>
           <span className="text-[13.5px] font-semibold text-muted">
-            {txs?.length ?? 0} transactions this month
+            {txs?.length ?? 0} transactions
           </span>
         </div>
 
+        <MonthPicker value={month} months={months} onChange={changeMonth} />
+
         <div className="flex-1" />
+
+        {/* Bulk import is desktop-only — picking files and reading a preview
+            table doesn't work well on a phone. */}
+        <button
+          onClick={() => downloadTemplateCsv(financeTags)}
+          className={`hidden md:flex ${secondaryButton}`}>
+          <Icon name="download" size={17} />
+          Template
+        </button>
+        <button
+          onClick={() => setImportOpen(true)}
+          className={`hidden md:flex ${secondaryButton}`}>
+          <Icon name="upload_file" size={17} />
+          Import CSV
+        </button>
 
         <button
           onClick={() => setDialogOpen(true)}
@@ -175,7 +260,7 @@ export default function FinanceView() {
                   className="rounded-[18px]"
                 />
                 <p className="m-0 text-center text-[13.5px] font-semibold text-muted">
-                  No spending yet this month.
+                  No spending in {monthLabel(month)}.
                 </p>
               </div>
             ) : (
@@ -207,70 +292,27 @@ export default function FinanceView() {
               </div>
             )}
           </div>
+
+          {/* Day-by-day breakdown, right under the category donut so it stays
+              above the fold no matter how long the transaction list gets. */}
+          <DailySpendChart
+            month={month}
+            txs={txs}
+            selectedDay={selectedDay}
+            onSelectDay={setSelectedDay}
+          />
         </section>
 
-        {/* Right: transactions sorted by createdAt (newest first) */}
-        <section className="rounded-[18px] border-[1.5px] border-line-soft bg-panel p-5">
-          <h2 className="m-0 mb-4 font-display text-[15.5px] font-semibold text-ink">
-            Transactions
-          </h2>
-          <div className="flex flex-col gap-2.5">
-            {txs === null && <CardSkeletons className="h-16" />}
-
-            {txs !== null && txs.length === 0 && (
-              <div className="flex flex-col items-center gap-2.5 py-6">
-                {/* eslint-disable-next-line @next/next/no-img-element -- tiny static asset, skip the optimizer */}
-                <img
-                  src="/income-not-found.png"
-                  alt=""
-                  width={80}
-                  height={80}
-                  className="rounded-[18px]"
-                />
-                <p className="m-0 text-center text-[13.5px] font-semibold text-muted">
-                  No transactions yet this month.
-                </p>
-              </div>
-            )}
-
-            {txs?.map((tx) => (
-              <div
-                key={tx.id}
-                className="flex items-center gap-3 rounded-[14px] border-[1.5px] border-line-soft bg-card p-3">
-                <span
-                  className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{
-                    background:
-                      (tx.type === "income" ? incomeColors : expenseColors)[
-                        tx.category
-                      ] ?? FALLBACK_TAG_COLOR,
-                  }}
-                />
-                <div className="min-w-0 flex-1 leading-tight">
-                  <p className="m-0 truncate text-[14px] font-bold text-ink">
-                    {tx.note || tx.category}
-                  </p>
-                  <p className="m-0 text-[12px] font-bold text-muted">
-                    {tx.category} · {formatTxDate(tx)}
-                  </p>
-                </div>
-                <span
-                  className={`shrink-0 text-[14px] font-extrabold ${
-                    tx.type === "income" ? "text-[#38a186]" : "text-ink"
-                  }`}>
-                  {tx.type === "income" ? "+" : "−"}
-                  {formatMoney(tx.amount)}
-                </span>
-                <button
-                  onClick={() => deleteTransaction(user.uid, tx.id)}
-                  aria-label={`Delete "${tx.note || tx.category}"`}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-muted-soft transition-colors hover:bg-primary/6 hover:text-primary">
-                  <Icon name="close" size={15} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Right: transactions by week, newest first */}
+        <TransactionsPanel
+          txs={txs}
+          month={month}
+          selectedDay={selectedDay}
+          onClearDay={() => setSelectedDay(null)}
+          expenseColors={expenseColors}
+          incomeColors={incomeColors}
+          onDelete={(id) => deleteTransaction(user.uid, id)}
+        />
       </div>
 
       <TransactionDialog
@@ -278,6 +320,13 @@ export default function FinanceView() {
         onClose={() => setDialogOpen(false)}
         onCreate={(data) => addTransaction(user.uid, data)}
         tags={financeTags}
+      />
+
+      <ImportDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        tags={financeTags}
+        onImport={handleImport}
       />
     </div>
   );
