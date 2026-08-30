@@ -48,25 +48,26 @@ export function subscribeToCards(
   uid: string,
   onChange: (cards: Card[]) => void,
 ) {
-  // The board shows cards SCHEDULED this month: their start–end range
-  // overlaps the current month. Undated cards fall back to their creation
-  // month. Overlap needs ranges on two fields, which one Firestore query
-  // can't express — fetch all and filter client-side (personal-scale data).
+  // The board shows cards SCHEDULED from this month onwards — no upper bound,
+  // so a task planned for any future month is visible the moment it's created,
+  // while months that are done with drop off. Undated cards fall back to their
+  // creation date. Backlog is the exception: it's a parking lot rather than a
+  // schedule, so its cards always show. Firestore can't express this across
+  // two date fields, so fetch all and filter client-side (personal-scale
+  // data).
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const monthStart = new Date(year, month, 1);
-  const monthEnd = new Date(year, month + 1, 0, 23, 59, 59, 999);
   const pad = (n: number) => String(n).padStart(2, "0");
-  const monthStartDay = `${year}-${pad(month + 1)}-01`;
-  const monthEndDay = `${year}-${pad(month + 1)}-${pad(monthEnd.getDate())}`;
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthStartDay = `${monthStart.getFullYear()}-${pad(now.getMonth() + 1)}-01`;
 
-  const inThisMonth = (card: Card) => {
-    const start = card.startDate ?? card.endDate;
+  const isCurrentOrLater = (card: Card) => {
+    if (card.col === "backlog") return true;
+    // The later end of the range decides: a task that runs into this month is
+    // still live even though it started before it.
     const end = card.endDate ?? card.startDate;
-    if (start && end) return start <= monthEndDay && end >= monthStartDay;
+    if (end) return end >= monthStartDay;
     const created = card.createdAt?.toDate();
-    return !created || (created >= monthStart && created <= monthEnd);
+    return !created || created >= monthStart;
   };
 
   const q = query(cardsCollection(uid), orderBy("createdAt", "desc"));
@@ -105,7 +106,7 @@ export function subscribeToCards(
           createdAt,
         };
         })
-        .filter(inThisMonth),
+        .filter(isCurrentOrLater),
     );
   });
 }
@@ -123,20 +124,6 @@ export function addCard(uid: string, data: NewCardData, order: number) {
 
 export function moveCard(uid: string, id: string, col: ColumnId) {
   return updateDoc(doc(getDb(), "users", uid, "todos", id), { col });
-}
-
-// A To-Do card whose start date is already behind us has effectively started —
-// move it to In Progress. Run once per board load, so a card the user then
-// drags back to To Do stays put until the next visit.
-export function autoStartOverdueCards(uid: string, cards: Card[]) {
-  const now = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-  for (const card of cards) {
-    if (card.col === "todo" && card.startDate && card.startDate <= today) {
-      moveCard(uid, card.id, "doing");
-    }
-  }
 }
 
 // Move a card to a column at a specific priority slot.

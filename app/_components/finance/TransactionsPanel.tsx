@@ -18,14 +18,18 @@ export default function TransactionsPanel({
   month,
   selectedDay,
   onClearDay,
+  selectedCategory,
+  onClearCategory,
   expenseColors,
   incomeColors,
   onDelete,
 }: {
-  txs: Transaction[] | null; // null while loading
+  txs: Transaction[] | null; // null while loading — already category-filtered
   month: MonthKey;
   selectedDay: number | null; // set by clicking a bar in the day chart
   onClearDay: () => void;
+  selectedCategory: string | null; // set by clicking a slice of the donut
+  onClearCategory: () => void;
   expenseColors: Record<string, string>;
   incomeColors: Record<string, string>;
   onDelete: (id: string) => void;
@@ -46,6 +50,9 @@ export default function TransactionsPanel({
     [visible, month, selectedDay],
   );
 
+  // Either filter narrows the list, so both change what an empty result means.
+  const filtered = selectedDay !== null || selectedCategory !== null;
+
   const dayLabel =
     selectedDay === null
       ? ""
@@ -61,6 +68,15 @@ export default function TransactionsPanel({
         <h2 className="m-0 font-display text-[15.5px] font-semibold text-ink">
           Transactions
         </h2>
+        {selectedCategory !== null && (
+          <button
+            onClick={onClearCategory}
+            aria-label={`Clear the ${selectedCategory} filter`}
+            className="flex items-center gap-1 rounded-lg bg-primary/10 py-[3px] pl-2.5 pr-1.5 text-[12px] font-extrabold tracking-[0.02em] text-primary transition-colors hover:bg-primary/16">
+            {selectedCategory}
+            <Icon name="close" size={14} />
+          </button>
+        )}
         {selectedDay !== null && (
           <button
             onClick={onClearDay}
@@ -75,20 +91,27 @@ export default function TransactionsPanel({
       <div className="flex flex-col gap-2.5">
         {visible === null && <CardSkeletons className="h-16" />}
 
-        {visible !== null && visible.length === 0 && selectedDay !== null && (
+        {visible !== null && visible.length === 0 && filtered && (
           <div className="flex flex-col items-center gap-2.5 py-6">
             <p className="m-0 text-center text-[13.5px] font-semibold text-muted">
-              Nothing on {dayLabel}.
+              {selectedDay !== null
+                ? selectedCategory !== null
+                  ? `No ${selectedCategory} on ${dayLabel}.`
+                  : `Nothing on ${dayLabel}.`
+                : `No ${selectedCategory} in ${monthLabel(month)}.`}
             </p>
             <button
-              onClick={onClearDay}
+              onClick={() => {
+                onClearDay();
+                onClearCategory();
+              }}
               className="rounded-xl border-[1.5px] border-line bg-card px-3.5 py-2 font-display text-[13.5px] font-semibold text-ink-soft transition-colors hover:bg-chip">
               Show the whole month
             </button>
           </div>
         )}
 
-        {visible !== null && visible.length === 0 && selectedDay === null && (
+        {visible !== null && visible.length === 0 && !filtered && (
           <div className="flex flex-col items-center gap-2.5 py-6">
             {/* eslint-disable-next-line @next/next/no-img-element -- tiny static asset, skip the optimizer */}
             <img
