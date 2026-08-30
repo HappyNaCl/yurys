@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   addCard,
-  autoStartOverdueCards,
   COLUMNS,
   deleteCard,
   moveCard,
@@ -42,14 +41,6 @@ export default function KanbanBoard() {
   } | null>(null);
 
   useEffect(() => subscribeToCards(user.uid, setCards), [user.uid]);
-
-  // Sweep started cards out of To Do once the first snapshot lands.
-  const sweptRef = useRef(false);
-  useEffect(() => {
-    if (cards === null || sweptRef.current) return;
-    sweptRef.current = true;
-    autoStartOverdueCards(user.uid, cards);
-  }, [cards, user.uid]);
 
   const todoTags = useTodoTags(user.uid);
   const tagColors = useMemo(() => todoColorMap(todoTags), [todoTags]);
@@ -111,14 +102,9 @@ export default function KanbanBoard() {
     <div className="flex flex-1 flex-col">
       {/* Page toolbar */}
       <div className="flex flex-wrap items-center gap-4 px-4 pb-1 pt-6.5 sm:px-7">
-        <div className="mr-1 flex flex-col leading-[1.15] gap-4">
-          <h1 className="m-0 font-display text-[26px] font-semibold text-ink">
-            To-do list
-          </h1>
-          <span className="text-[13.5px] font-semibold text-muted">
-            {cards?.length ?? 0} tasks this month
-          </span>
-        </div>
+        <h1 className="m-0 mr-1 font-display text-[26px] font-semibold text-ink">
+          To-do list
+        </h1>
 
         <div className="flex-1" />
 

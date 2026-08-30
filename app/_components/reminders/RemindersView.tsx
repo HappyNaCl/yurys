@@ -161,14 +161,9 @@ export default function RemindersView() {
     <div className="flex flex-1 flex-col">
       {/* Page toolbar */}
       <div className="flex flex-wrap items-center gap-4 px-4 pb-1 pt-[26px] sm:px-7">
-        <div className="mr-1 flex flex-col gap-4 leading-[1.15]">
-          <h1 className="m-0 font-display text-[26px] font-semibold text-ink">
-            Reminders
-          </h1>
-          <span className="text-[13.5px] font-semibold text-muted">
-            {reminders?.length ?? 0} active
-          </span>
-        </div>
+        <h1 className="m-0 mr-1 font-display text-[26px] font-semibold text-ink">
+          Reminders
+        </h1>
 
         <div className="flex-1" />
 

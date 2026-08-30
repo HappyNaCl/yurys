@@ -82,6 +82,9 @@ export default function FinanceView() {
   const [importOpen, setImportOpen] = useState(false);
   // Day of the month picked from the chart; narrows the transaction list only.
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  // Expense category picked from the donut. Composes with the day filter:
+  // both narrow the day chart and the transaction list.
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   // Bumped after an import, which can add months (and balance) the live
   // month snapshot below wouldn't notice.
   const [imported, setImported] = useState(0);
@@ -130,10 +133,12 @@ export default function FinanceView() {
     };
   }, [user.uid, txs, imported]);
 
-  // A day number only means something within its month.
+  // A day number only means something within its month, and a category can
+  // disappear from one month to the next.
   function changeMonth(next: MonthKey) {
     setMonth(next);
     setSelectedDay(null);
+    setSelectedCategory(null);
   }
 
   async function handleImport(rows: ImportedTransaction[]) {
@@ -179,18 +184,26 @@ export default function FinanceView() {
     return { incomeTotal, expenseTotal, segments };
   }, [txs, expenseColors]);
 
+  const selectedSegment =
+    segments.find((s) => s.label === selectedCategory) ?? null;
+
+  // What the day chart and the transaction list actually show. The stat cards
+  // above stay on the whole month, so the filter reads as a zoom-in, not as
+  // the month's numbers changing.
+  const visibleTxs = useMemo(() => {
+    if (txs === null || selectedCategory === null) return txs;
+    return txs.filter(
+      (tx) => tx.type === "expense" && tx.category === selectedCategory,
+    );
+  }, [txs, selectedCategory]);
+
   return (
     <div className="flex flex-1 flex-col">
       {/* Page toolbar */}
       <div className="flex flex-wrap items-center gap-4 px-4 pb-1 pt-6.5 sm:px-7">
-        <div className="mr-1 flex flex-col gap-4 leading-[1.15]">
-          <h1 className="m-0 font-display text-[26px] font-semibold text-ink">
-            Finance
-          </h1>
-          <span className="text-[13.5px] font-semibold text-muted">
-            {txs?.length ?? 0} transactions
-          </span>
-        </div>
+        <h1 className="m-0 mr-1 font-display text-[26px] font-semibold text-ink">
+          Finance
+        </h1>
 
         <MonthPicker value={month} months={months} onChange={changeMonth} />
 
@@ -267,27 +280,48 @@ export default function FinanceView() {
               <div className="flex flex-col items-center gap-6 sm:flex-row">
                 <Donut
                   segments={segments}
-                  centerLabel={formatMoney(expenseTotal)}
-                  centerSub="spent"
+                  centerLabel={formatMoney(
+                    selectedSegment ? selectedSegment.value : expenseTotal,
+                  )}
+                  centerSub={selectedSegment ? selectedSegment.label : "spent"}
+                  selected={selectedCategory}
+                  onSelect={setSelectedCategory}
                 />
-                <ul className="m-0 flex w-full flex-1 list-none flex-col gap-2 p-0">
-                  {segments.map((s) => (
-                    <li
-                      key={s.label}
-                      className="flex items-center gap-2.5 text-[13px] font-bold">
-                      <span
-                        className="h-2.5 w-2.5 shrink-0 rounded-full"
-                        style={{ background: s.color }}
-                      />
-                      <span className="text-ink-soft">{s.label}</span>
-                      <span className="ml-auto text-ink">
-                        {formatMoney(s.value)}
-                      </span>
-                      <span className="w-11 text-right text-muted">
-                        {Math.round((s.value / expenseTotal) * 100)}%
-                      </span>
-                    </li>
-                  ))}
+                <ul className="m-0 flex w-full flex-1 list-none flex-col gap-0.5 p-0">
+                  {segments.map((s) => {
+                    const picked = selectedCategory === s.label;
+                    return (
+                      <li key={s.label}>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedCategory(picked ? null : s.label)
+                          }
+                          aria-pressed={picked}
+                          className={`flex w-full items-center gap-2.5 rounded-[10px] px-1.5 py-1.5 text-left text-[13px] font-bold transition-colors hover:bg-chip ${
+                            picked ? "bg-chip" : ""
+                          } ${
+                            selectedCategory !== null && !picked
+                              ? "opacity-45"
+                              : ""
+                          }`}>
+                          <span
+                            className="h-2.5 w-2.5 shrink-0 rounded-full"
+                            style={{ background: s.color }}
+                          />
+                          <span className="truncate text-ink-soft">
+                            {s.label}
+                          </span>
+                          <span className="ml-auto shrink-0 text-ink">
+                            {formatMoney(s.value)}
+                          </span>
+                          <span className="w-11 shrink-0 text-right text-muted">
+                            {Math.round((s.value / expenseTotal) * 100)}%
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
@@ -297,7 +331,7 @@ export default function FinanceView() {
               above the fold no matter how long the transaction list gets. */}
           <DailySpendChart
             month={month}
-            txs={txs}
+            txs={visibleTxs}
             selectedDay={selectedDay}
             onSelectDay={setSelectedDay}
           />
@@ -305,10 +339,12 @@ export default function FinanceView() {
 
         {/* Right: transactions by week, newest first */}
         <TransactionsPanel
-          txs={txs}
+          txs={visibleTxs}
           month={month}
           selectedDay={selectedDay}
           onClearDay={() => setSelectedDay(null)}
+          selectedCategory={selectedCategory}
+          onClearCategory={() => setSelectedCategory(null)}
           expenseColors={expenseColors}
           incomeColors={incomeColors}
           onDelete={(id) => deleteTransaction(user.uid, id)}
